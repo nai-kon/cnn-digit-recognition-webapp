@@ -1,0 +1,76 @@
+﻿<!doctype html>
+<html lang="ja">
+<head>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <meta charset="utf-8">
+    <title>CNN Digit Recognition </title>
+</head>
+
+<body>
+
+    <canvas id="canvas" width="196" height="196" style="border: solid 1px black"></canvas></br>
+    <button id="clear" onclick="onClear()">Clear</button>
+    <button id="input" onclick="onRecognition()">Recognition</button></br>
+    <textarea id="output"></textarea>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+    
+
+    <script type="text/javascript">
+
+        var canvas = document.getElementById("canvas");
+        var context = canvas.getContext('2d');
+        context.lineWidth = 7;
+        context.lineCap = "round";
+        context.fillStyle = "white";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+
+        var mouse = {
+            lastx : 0,
+            lasty : 0,
+            l_btn : false
+        };
+
+	    // Add Drawing events
+        canvas.addEventListener("mousedown", function(e) { mouse.l_btn = true; });
+        canvas.addEventListener("mouseup", function(e) { mouse.l_btn = false; });
+        canvas.addEventListener("mousemove", function(e) {
+            var rect = e.target.getBoundingClientRect();
+            x = e.clientX - rect.left;
+            y = e.clientY - rect.top;
+            if(mouse.l_btn){
+                context.fillStyle = "black";
+                context.beginPath();
+                context.moveTo(mouse.lastx, mouse.lasty);
+                context.lineTo(x, y);
+                context.stroke();
+            }
+            mouse.lastx = x;
+            mouse.lasty = y;
+        });
+
+        function onClear(){
+            mouse.l_btn = false;
+            context.fillStyle = "white";
+            context.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // Recognition
+        function onRecognition() {
+            $.ajax({
+                    url: './DigitRecognition',
+                    type:'POST',
+                    data : {img : canvas.toDataURL("image/png").replace('data:image/png;base64,','') },
+                }).done(function(data) {
+                    console.log(data);
+                    $('#output').text(data)
+                }).fail(function(XMLHttpRequest, textStatus, errorThrown) {
+                    console.log(XMLHttpRequest);
+                    alert("error");
+                })
+        }
+
+
+     </script>
+</body>

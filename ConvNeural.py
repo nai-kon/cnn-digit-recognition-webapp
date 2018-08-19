@@ -128,6 +128,7 @@ class ConvNeuralNet:
     def Predict(self, imgpath):
         try:
             img = Image.open(imgpath).convert('L')
+        
         except IOError:
             print("file not found")
             return None
@@ -136,7 +137,7 @@ class ConvNeuralNet:
         start = time.time()
         img = self.__centering_img(img)
         print("time:{}".format(time.time()-start))
-        img.show()
+        #img.show()
 
         img.thumbnail((28, 28))
         img = np.array(img, dtype=np.float32)
