@@ -1,76 +1,221 @@
 ﻿<!doctype html>
 <html lang="ja">
 <head>
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <!-- <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}"> -->
     <meta charset="utf-8">
     <title>CNN Digit Recognition </title>
+
 </head>
 
 <body>
 
-    <canvas id="canvas" width="196" height="196" style="border: solid 1px black"></canvas></br>
-    <button id="clear" onclick="onClear()">Clear</button>
-    <button id="input" onclick="onRecognition()">Recognition</button></br>
-    <textarea id="output"></textarea>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <p style="font-size: x-large; text-align: center;">CNN Digit Recognition using TensorFlow</br>
+        with auto-centering input image.</p>
+    <div style="text-align:center">
+        <a href="https://github.com/nai-kon/CNN-Digit-Recognition">https://github.com/nai-kon/CNN-Digit-Recognition</a></br>
+        created by Katz Sasaki
+    </div>
+    </br>
+    <div style="text-align:center">
+        <canvas id="input" width="196" height="196" style="border: solid 1px black"></canvas>
+        <canvas id="result" width="196" height="196" style="border: solid 1px black"></canvas>
+        <svg id="probGraph"></svg>
+    </div>
+    <div style="text-align:center">
+        <button id="clear" onclick="onClear()" style="text-align:center">Clear</button></br>
+        <p id="probStr">Probability : </p>
+    </div>
 
-    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>   
+    <script src="http://d3js.org/d3.v5.min.js"></script>
 
     <script type="text/javascript">
 
-        var canvas = document.getElementById("canvas");
-        var context = canvas.getContext('2d');
-        context.lineWidth = 7;
-        context.lineCap = "round";
-        context.fillStyle = "white";
-        context.fillRect(0, 0, canvas.width, canvas.height);
+        let canvasIn = document.getElementById("input");
+        let ctxIn = canvasIn.getContext('2d');
+        let canvasOut = document.getElementById("result");
+        let ctxOut = canvasOut.getContext('2d');
+        let svgGraph = null;
+        let mouselbtn = false;
 
+        // initilize
+        window.onload = function(){
 
-        var mouse = {
-            lastx : 0,
-            lasty : 0,
-            l_btn : false
-        };
+            ctxIn.lineWidth = 7;
+            ctxIn.lineCap = "round";
+            ctxIn.fillStyle = "white";
+            ctxIn.fillRect(0, 0, canvasIn.width, canvasIn.height);            
+            ctxIn.fillStyle = "black";
 
-	    // Add Drawing events
-        canvas.addEventListener("mousedown", function(e) { mouse.l_btn = true; });
-        canvas.addEventListener("mouseup", function(e) { mouse.l_btn = false; });
-        canvas.addEventListener("mousemove", function(e) {
-            var rect = e.target.getBoundingClientRect();
-            x = e.clientX - rect.left;
-            y = e.clientY - rect.top;
-            if(mouse.l_btn){
-                context.fillStyle = "black";
-                context.beginPath();
-                context.moveTo(mouse.lastx, mouse.lasty);
-                context.lineTo(x, y);
-                context.stroke();
-            }
-            mouse.lastx = x;
-            mouse.lasty = y;
-        });
-
-        function onClear(){
-            mouse.l_btn = false;
-            context.fillStyle = "white";
-            context.fillRect(0, 0, canvas.width, canvas.height);
+            ctxOut.fillStyle = "black";
+            ctxOut.font = "160px 'century'";
+            ctxOut.textAlign = "center";
+            ctxOut.textBaseline = "middle";
+            showPredictDigit("0");
+            initProbGraph();
         }
 
-        // Recognition
+
+	    // add cavas events
+        canvasIn.addEventListener("mousedown", function(e) { 
+
+            if(e.button == 0){
+                let rect = e.target.getBoundingClientRect();
+                let x = e.clientX - rect.left;
+                let y = e.clientY - rect.top;
+                mouselbtn = true;
+                ctxIn.beginPath();
+                ctxIn.moveTo(x, y);
+            }   
+            else if(e.button == 2){
+                onClear();  // right click for clear input
+            }
+        });
+        canvasIn.addEventListener("mouseup", function(e) { 
+            if(e.button == 0){
+                mouselbtn = false; 
+                //console.time("time");
+                onRecognition();
+                //console.timeEnd("time");
+            }
+        });
+        canvasIn.addEventListener("mousemove", function(e) {
+            let rect = e.target.getBoundingClientRect();
+            let x = e.clientX - rect.left;
+            let y = e.clientY - rect.top;
+            if(mouselbtn){
+                ctxIn.lineTo(x, y);
+                ctxIn.stroke();
+            }
+        });
+        
+        canvasIn.addEventListener("touchstart", function(e) {
+            // for touch device
+            if (e.targetTouches.length == 1) {
+                let rect = e.target.getBoundingClientRect();
+                let touch = e.targetTouches[0];
+                let x = touch.clientX - rect.left;
+                let y = touch.clientY - rect.top;
+                ctxIn.beginPath();
+                ctxIn.moveTo(x, y);
+            }
+            e.preventDefault();
+        }, false);
+
+        canvasIn.addEventListener("touchmove", function(e) {
+            // for touch device
+            if (e.targetTouches.length == 1) {
+                let rect = e.target.getBoundingClientRect();
+                let touch = e.targetTouches[0];
+                let x = touch.clientX - rect.left;
+                let y = touch.clientY - rect.top;
+                ctxIn.lineTo(x, y);
+                ctxIn.stroke();
+            }
+            e.preventDefault();
+        });
+
+        canvasIn.addEventListener("touchend", function(e) {
+            onRecognition();
+        }, false);
+
+        // prevent display the contextmenu 
+        canvasIn.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        // clear canvas
+        function onClear(){
+            mouselbtn = false;
+            ctxIn.fillStyle = "white";
+            ctxIn.fillRect(0, 0, canvasIn.width, canvasIn.height);
+            ctxIn.fillStyle = "black";
+        }
+
+        // post data to server for recognition
         function onRecognition() {
             $.ajax({
                     url: './DigitRecognition',
                     type:'POST',
-                    data : {img : canvas.toDataURL("image/png").replace('data:image/png;base64,','') },
+                    data : {img : canvasIn.toDataURL("image/png").replace('data:image/png;base64,','') },
+
                 }).done(function(data) {
-                    console.log(data);
-                    $('#output').text(data)
+
+                    let resultJson = JSON.parse(data);
+                    showPredictDigit(resultJson.predictDigit);
+                    showProbability(resultJson);
+                    updateProbGraph(resultJson);
+
                 }).fail(function(XMLHttpRequest, textStatus, errorThrown) {
                     console.log(XMLHttpRequest);
                     alert("error");
                 })
         }
 
+        // show predict digit to output canvas
+        function showPredictDigit(strDigit){
+            ctxOut.clearRect(0, 0, canvasOut.width, canvasOut.height);
+            ctxOut.fillText(strDigit, canvasOut.width/2, canvasOut.height/2);
+        }
+
+        function showProbability(resultJson){
+            document.getElementById("probStr").innerHTML = 
+                "Probability : " + resultJson.prob[resultJson.predictDigit].toFixed(2) + "%";
+        }
+
+
+        // init probability　graph
+        function initProbGraph(){
+
+            const dummyData = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]; // dummy data for initialize graph
+            const margin = { top: 10, right: 10, bottom: 10, left: 20 }
+                , width = 250, height = 180;
+
+            let yScale = d3.scaleLinear()
+                .domain([9, 0])
+                .range([height, 0]);
+            
+            svgGraph = d3.select("#probGraph")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            svgGraph.append("g")
+                .attr("class", "y axis")
+                .call(d3.axisLeft(yScale));
+
+            const barHeight = 20
+            svgGraph.selectAll("svg")
+                .data(dummyData)
+                .enter()
+                .append("rect")
+                .attr("y", (d,i)=>yScale(i) - barHeight / 2)
+                .attr("height", barHeight)
+                .style("fill", "green")
+                .attr("x", 0)
+                .attr("width", (d)=> d * 2)
+                .call(d3.axisLeft(yScale));
+        }
+
+        // update probability　graph
+        function updateProbGraph(resultJson){
+
+            let graphData　= [];
+            for (let val in resultJson.prob){
+                graphData.push(resultJson.prob[val]);
+            }
+
+            svgGraph.selectAll("rect")
+                .data(graphData)
+                .transition()
+                .duration(300)
+                .style("fill", (d, i)=> (i == resultJson.predictDigit ? "blue":"green"))
+                .attr("width", (d)=> d * 2)
+        }
 
      </script>
+
+    
+
 </body>

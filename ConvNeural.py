@@ -136,7 +136,7 @@ class ConvNeuralNet:
         # 文字のセンタリング
         start = time.time()
         img = self.__centering_img(img)
-        print("time:{}".format(time.time()-start))
+        #print("time:{}".format(time.time()-start))
         #img.show()
 
         img.thumbnail((28, 28))

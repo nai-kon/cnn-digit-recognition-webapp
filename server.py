@@ -1,9 +1,8 @@
 from flask import Flask, render_template, request
 from ConvNeural import ConvNeuralNet
 from io import BytesIO
-import os, base64
+import base64, json
 import numpy as np
-from PIL import Image
 
 app = Flask(__name__)
 cnn = ConvNeuralNet()
@@ -18,16 +17,21 @@ def index():
 @app.route('/DigitRecognition', methods=['GET', 'POST'])
 def ExecPy():
 
-    retStr = "Err"
+    retJson = {"predictDigit" : "Err", "prob" : {}}
     if request.method == 'POST':
-
         res =  cnn.Predict(BytesIO(base64.urlsafe_b64decode(request.form['img'])))        
         if res is not None:
-            resIdx = np.argmax(res)
-            print("推測結果:{0} .. [{1:.2f}%]".format(resIdx, res[resIdx]*100))
-            retStr = "推測結果:{0} .. [{1:.2f}%]".format(resIdx, res[resIdx]*100)
 
-    return retStr
+            retJson["predictDigit"] = str(np.argmax(res))
+            for i, item in enumerate(res):
+                #print(item)
+                retJson["prob"][i] = float(item*100)
+
+            #resIdx = np.argmax(res)
+            #print("推測結果:{0} .. [{1:.2f}%]".format(resIdx, res[resIdx]*100))
+            #retStr = "推測結果:{0} .. [{1:.2f}%]".format(resIdx, res[resIdx]*100)
+
+    return json.dumps(retJson)
 
 
 if __name__ == '__main__':
