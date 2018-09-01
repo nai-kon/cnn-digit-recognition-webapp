@@ -20,11 +20,9 @@ def index():
 @app.route('/DigitRecognition', methods=['GET', 'POST'])
 def ExecPy():
 
-    print("Exec Py Enter")
-
     retJson = {"predict_digit" : "Err", "detect_img" :"", "centering_img" : "", "prob" : {}}
     if request.method == 'POST':
-        request.body # IncompleteRead防止
+        # request.body # IncompleteRead防止
         postImg = BytesIO(base64.urlsafe_b64decode(request.form['img']))
         res =  cnn.predict(postImg) 
         print(res)
@@ -38,8 +36,9 @@ def ExecPy():
             for i, item in enumerate(res):
                 retJson["prob"][i] = float(item*100)
         
+            # 入力数字と推測結果を保存
             postImg = Image.open(postImg)
-            postImg.save("./PostImages/{}_{}.png".format(datetime.now().strftime('%X'),retJson["predict_digit"] ))
+            postImg.save("./predict_results/{}_{}.png".format(datetime.now().strftime('%m-%d_%H.%M.%S'),retJson["predict_digit"] ))
 
     return json.dumps(retJson)
 
