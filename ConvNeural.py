@@ -3,7 +3,7 @@ import time
 import tensorflow as tf
 import numpy as np
 
-from PIL import Image, ImageChops
+from PIL import Image, ImageChops, ImageDraw
 from tensorflow.examples.tutorials.mnist import input_data
 
 # CNNクラス
@@ -53,18 +53,12 @@ class ConvNeuralNet:
         correct_prediction = tf.equal(tf.argmax(self.y_conv, 1), tf.argmax(self.y_,1))
         self.accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
-        # ネットワークの読み込み
-        self.saver = tf.train.Saver()
-        if self.isTrained():
-            self.saver.restore(self.sess, "WeightFile.ckpt") #データの読み込み
-            print("学習データの読み込み完了")
-
     def __del__(self):
         self.sess.close()
 
     # 訓練済みか(ネットワークが保存済みか)
     def isTrained(self):
-        return tf.train.checkpoint_exists("WeightFile.ckpt")
+        return tf.train.checkpoint_exists("./model/WeightFile.ckpt")
 
     def __weight_variable(self, shape):
         initial = tf.truncated_normal(shape, stddev = 0.1)
@@ -99,17 +93,27 @@ class ConvNeuralNet:
                     if x < left: left   = x
                     if y < top: top     = y
                     if x > right: right = x
-                    if y > bottom: bottom = y    
+                    if y > bottom: bottom = y   
+                        
+        # (経過表示用)文字を囲む枠を描画
+        #detect_img = img.copy();
+        #draw = ImageDraw.Draw(detect_img)
+        #draw.rectangle((left-3, top-3, right+3, bottom+3), outline=(0))
 
         # センタリングのシフト量を計算
         shiftX = int((left + (right - left) / 2) - width / 2)
         shiftY = int((top + (bottom - top) / 2) - height / 2)
 
         # センタリング(シフト量はマイナスとなる)
-        return ImageChops.offset(img, -shiftX, -shiftY)
+        return ImageChops.offset(img, -shiftX, -shiftY)#, detect_img
 
     # 訓練処理
-    def Training(self):
+    def train(self):
+        if self.isTrained():
+            if input("Network is already trained. Retrain it? (y/n) ") != "y":
+                print("exit")
+                return
+
         mnist = input_data.read_data_sets("MNIST_data/", one_hot = True)
         self.sess.run(tf.global_variables_initializer())
 
@@ -122,10 +126,20 @@ class ConvNeuralNet:
 
             self.train_step.run(feed_dict = {self.x:batch[0], self.y_:batch[1], self.keep_prob:0.5})
         
-        self.saver.save(self.sess,"./WeightFile.ckpt")
+        self.saver.save(self.sess,"./model/WeightFile.ckpt")
+
+    # モデルの読み込み
+    def loadmodel(self):
+        self.saver = tf.train.Saver()
+        if self.isTrained():
+            self.saver.restore(self.sess, "./model/WeightFile.ckpt")
+            print("load model")
+        else:
+            print("no model for load")
+        
 
     # 予測処理
-    def Predict(self, imgpath):
+    def predict(self, imgpath):
         try:
             img = Image.open(imgpath).convert('L')
         
@@ -136,8 +150,8 @@ class ConvNeuralNet:
         # 文字のセンタリング
         start = time.time()
         img = self.__centering_img(img)
-        #print("time:{}".format(time.time()-start))
-        #img.show()
+        print("time:{}".format(time.time()-start))
+        #img = center_img.copy()
 
         img.thumbnail((28, 28))
         img = np.array(img, dtype=np.float32)
@@ -145,68 +159,4 @@ class ConvNeuralNet:
         img = img.reshape(1, 784)
 
         res = self.sess.run(self.y_conv, feed_dict = {self.x : img, self.y_:[[0.0] * 10], self.keep_prob:1.0})[0]
-        return res
-
-
-    # # 文字位置のセンタリング
-    # def CenteringNP(self, img):
-
-    #     imgNP = np.array(img, dtype=np.uint8)
-
-    #     # 文字の位置を取得
-    #     imgW, imgH = img.size[0], img.size[1]
-    #     left,top,right,bottom = imgW, imgH, -1, -1
-    #     for y in range(imgH):
-    #         for x in range(imgW):
-    #             if imgNP[y, x] < 255:
-    #                 if x < left: left   = x
-    #                 if y < top: top     = y
-    #                 if x > right: right = x
-    #                 if y > bottom: bottom = y
-    #     #print(rcAround)       
-
-    #     # センタリングのオフセット量を計算
-    #     shiftX = round((left + (right - left) / 2) - imgW / 2)
-    #     shiftY = round((top + (bottom - top) / 2) - imgH / 2)
-
-    #     # センタリング
-    #     imgCtr = np.full_like(imgNP, 255)
-    #     for yorg, y in enumerate(range(shiftY, imgW + shiftY)):
-    #         for xorg, x in enumerate(range(shiftX, imgH + shiftX)):
-    #             if y >= 0 and x >=0 and y < imgH and x < imgW:
-    #                 #print("xorg:{} yorg:{}, x:{} y:{}".format(xorg, yorg, x, y))
-    #                 imgCtr[yorg, xorg] = imgNP[y, x]
-
-    #     return Image.fromarray(imgCtr, 'L')
-
-
-    # # 文字位置のセンタリング
-    # def Centering(self, img):
-
-    #     # 文字の位置を取得
-    #     imgW, imgH = img.size[0], img.size[1]
-    #     left,top,right,bottom = imgW, imgH, -1, -1
-    #     for y in range(imgH):
-    #         for x in range(imgW):
-    #             if img.getpixel((x,y)) < 255:
-    #                 if x < left: left   = x
-    #                 if y < top: top     = y
-    #                 if x > right: right = x
-    #                 if y > bottom: bottom = y
-    #     #print(rcAround)       
-
-    #     # センタリングのオフセット量を計算
-    #     shiftX = round((left + (right - left) / 2) - imgW / 2)
-    #     shiftY = round((top + (bottom - top) / 2) - imgH / 2)
-
-    #     # センタリング
-    #     imgCtr = Image.new('L', img.size, (255))
-    #     for yorg, y in enumerate(range(shiftY, imgW + shiftY)):
-    #         for xorg, x in enumerate(range(shiftX, imgH + shiftX)):
-    #             if y >= 0 and x >=0 and y < imgH and x < imgW:
-    #                 #print("xorg:{} yorg:{}, x:{} y:{}".format(xorg, yorg, x, y))
-    #                 pix = img.getpixel((x,y))
-    #                 if pix < 255:
-    #                     imgCtr.putpixel((xorg, yorg), pix) 
-
-    #     return imgCtr
+        return res#, center_img, detect_img
