@@ -1,11 +1,14 @@
+from io import BytesIO
 from flask import Flask, render_template, request
 from ConvNeural import ConvNeuralNet
-from io import BytesIO
 import base64, json
 import numpy as np
+from PIL import Image
+from datetime import datetime
 
 app = Flask(__name__)
 cnn = ConvNeuralNet()
+cnn.loadmodel()
 
 # index にアクセスしたときの処理
 @app.route('/')
@@ -17,23 +20,35 @@ def index():
 @app.route('/DigitRecognition', methods=['GET', 'POST'])
 def ExecPy():
 
-    retJson = {"predictDigit" : "Err", "prob" : {}}
+    print("Exec Py Enter")
+
+    retJson = {"predict_digit" : "Err", "detect_img" :"", "centering_img" : "", "prob" : {}}
     if request.method == 'POST':
-        res =  cnn.Predict(BytesIO(base64.urlsafe_b64decode(request.form['img'])))        
+        request.body # IncompleteRead防止
+        postImg = BytesIO(base64.urlsafe_b64decode(request.form['img']))
+        res =  cnn.predict(postImg) 
+        print(res)
+        
         if res is not None:
 
-            retJson["predictDigit"] = str(np.argmax(res))
-            for i, item in enumerate(res):
-                #print(item)
-                retJson["prob"][i] = float(item*100)
+            retJson["predict_digit"] = str(np.argmax(res))
+            #retJson["detect_img"] = imgtob64str(detect_img)
+            #retJson["centering_img"] = imgtob64str(center_img)
 
-            #resIdx = np.argmax(res)
-            #print("推測結果:{0} .. [{1:.2f}%]".format(resIdx, res[resIdx]*100))
-            #retStr = "推測結果:{0} .. [{1:.2f}%]".format(resIdx, res[resIdx]*100)
+            for i, item in enumerate(res):
+                retJson["prob"][i] = float(item*100)
+        
+            postImg = Image.open(postImg)
+            postImg.save("./PostImages/{}_{}.png".format(datetime.now().strftime('%X'),retJson["predict_digit"] ))
 
     return json.dumps(retJson)
 
+def imgtob64str(img):
+    imbuf = BytesIO()
+    img.save(imbuf, "PNG")
+    return str(base64.b64encode(imbuf.getvalue())).lstrip("b'").rstrip("'")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')
+    
 
