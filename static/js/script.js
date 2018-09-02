@@ -157,7 +157,7 @@ function showResult(resultJson){
 
     // show probability
     document.getElementById("probStr").innerHTML = 
-        "確率 : " + resultJson.prob[resultJson.predict_digit].toFixed(2) + "%";    
+        "Probability : " + resultJson.prob[resultJson.predict_digit].toFixed(2) + "%";    
 
     // show processing images
     //drawImgToCanvas("detectimg", resultJson.detect_img);

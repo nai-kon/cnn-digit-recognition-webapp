@@ -25,7 +25,6 @@ def ExecPy():
         # request.body # IncompleteRead防止
         postImg = BytesIO(base64.urlsafe_b64decode(request.form['img']))
         res =  cnn.predict(postImg) 
-        print(res)
         
         if res is not None:
 
