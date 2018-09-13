@@ -109,10 +109,6 @@ class ConvNeuralNet:
 
     # 学習処理
     def train(self):
-        if self.isTrained():
-            if input("Network is already trained. Retrain it? (y/n) ") != "y":
-                print("exit")
-                return
 
         mnist = input_data.read_data_sets("MNIST_data/", one_hot = True)
         self.sess.run(tf.global_variables_initializer())

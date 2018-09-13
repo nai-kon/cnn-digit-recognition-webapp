@@ -6,8 +6,8 @@ if __name__ == '__main__':
     cnn = ConvNeuralNet()
 
     if cnn.isTrained():
-        if input('Trained model is exist. Overwrite it? y/n ') == "y":
+        if input('Trained model is exist. Overwrite it? y/n ') == "n":
             sys.exit()
-            
+
     # 学習
     cnn.train()
