@@ -47,7 +47,7 @@ class ConvNeuralNet:
         b_fc2 = self.__bias_variable([10])
         self.y_conv = tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2) + b_fc2) # ソフトマックス関数で確率計算
 
-        # 訓練関数
+        # 学習関数
         cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=self.y_, logits=self.y_conv))
         self.train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
         correct_prediction = tf.equal(tf.argmax(self.y_conv, 1), tf.argmax(self.y_,1))
@@ -56,7 +56,7 @@ class ConvNeuralNet:
     def __del__(self):
         self.sess.close()
 
-    # 訓練済みか(ネットワークが保存済みか)
+    # 学習済みか(ネットワークが保存済みか)
     def isTrained(self):
         return tf.train.checkpoint_exists("./model/WeightFile.ckpt")
 
@@ -107,7 +107,7 @@ class ConvNeuralNet:
         # センタリング(シフト量はマイナスとなる)
         return ImageChops.offset(img, -shiftX, -shiftY)#, detect_img
 
-    # 訓練処理
+    # 学習処理
     def train(self):
         if self.isTrained():
             if input("Network is already trained. Retrain it? (y/n) ") != "y":

@@ -4,28 +4,30 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
     <meta charset="utf-8">
     <title>CNN Digit Recognition </title>
-
 </head>
 
 <body>
-
-    <p style="font-size: x-large; text-align: center;">CNN Digit Recognition using TensorFlow</br>
+    <p class="title common">CNN Digit Recognition using TensorFlow<br/>
         with auto-centering input image.</p>
-    <div style="text-align:center">
-        <a href="https://github.com/nai-kon/CNN-Digit-Recognition">https://github.com/nai-kon/CNN-Digit-Recognition</a></br>
+    <div class="common">
+        <a href="https://github.com/nai-kon/CNN-Digit-Recognition">github.com/nai-kon/CNN-Digit-Recognition</a><br/>
         created by Katz Sasaki
     </div>
-    </br>
-    <div style="text-align:center">
-        <canvas id="inputimg" width="196" height="196" style="border: solid 1px black"></canvas>
+    <br/>
+    <div class="common">
+        <div class="boxitem">
+            <canvas id="inputimg" width="196" height="196" style="border: solid 1px black"></canvas> 
+            <p><button id="clearbtn" >Clear</button></p>
+        </div>
         <!--<canvas id="detectimg" width="98" height="98" style="border: solid 1px black"></canvas>-->
         <!--<canvas id="centerimg" width="98" height="98" style="border: solid 1px black"></canvas>-->
-        <canvas id="predictdigit" width="196" height="196" style="border: solid 1px black"></canvas>
-        <svg id="probGraph"></svg>
-    </div>
-    <div style="text-align:center">
-        <button id="clearbtn" >Clear</button></br>
-        <p id="probStr">Probability : </p>
+        <div class="boxitem">
+            <canvas id="predictdigit" width="196" height="196" style="border: solid 1px black"></canvas>
+            <p id="probStr">Probability : </p>
+        </div>
+        <div class="boxitem">
+            <svg id="probGraph" width="250" height="196"></svg>
+        </div>
     </div>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>

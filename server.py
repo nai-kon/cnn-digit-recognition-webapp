@@ -19,7 +19,6 @@ def index():
 # /DigitRecognitionにPOSTされた画像で数字認識
 @app.route('/DigitRecognition', methods=['GET', 'POST'])
 def ExecPy():
-
     retJson = {"predict_digit" : "Err", "detect_img" :"", "centering_img" : "", "prob" : {}}
     if request.method == 'POST':
         # request.body # IncompleteRead防止

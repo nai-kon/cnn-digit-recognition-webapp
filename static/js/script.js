@@ -10,12 +10,11 @@ let mouselbtn = false;
 
 // initilize
 window.onload = function(){
-
+    
+    ctxIn.fillStyle = "white";
+    ctxIn.fillRect(0, 0, cvsIn.width, cvsIn.height);
     ctxIn.lineWidth = 7;
     ctxIn.lineCap = "round";
-    ctxIn.fillStyle = "white";
-    ctxIn.fillRect(0, 0, cvsIn.width, cvsIn.height);            
-    ctxIn.fillStyle = "black";
 
     ctxOut.fillStyle = "black";
     ctxOut.font = "160px 'century'";
@@ -51,11 +50,11 @@ function initProbGraph(){
         .data(dummyData)
         .enter()
         .append("rect")
-        .attr("y", (d,i)=>yScale(i) - barHeight / 2)
+        .attr("y", function(d,i){return yScale(i) - barHeight / 2})
         .attr("height", barHeight)
         .style("fill", "green")
         .attr("x", 0)
-        .attr("width", (d)=> d * 2)
+        .attr("width", function(d){return d * 2})
         .call(d3.axisLeft(yScale));
 }
 
@@ -77,9 +76,7 @@ cvsIn.addEventListener("mousedown", function(e) {
 cvsIn.addEventListener("mouseup", function(e) { 
     if(e.button == 0){
         mouselbtn = false; 
-        console.time("time");
         onRecognition();
-        console.timeEnd("time");
     }
 });
 cvsIn.addEventListener("mousemove", function(e) {
@@ -113,14 +110,19 @@ cvsIn.addEventListener("touchmove", function(e) {
         let y = touch.clientY - rect.top;
         ctxIn.lineTo(x, y);
         ctxIn.stroke();
+        e.preventDefault();
     }
+});
+
+cvsIn.addEventListener("touchend", function(e) { 
+    // for touch device
+    onRecognition();
 });
 
 // prevent display the contextmenu 
 cvsIn.addEventListener('contextmenu', function(e) {
     e.preventDefault();
 });
-
 
 document.getElementById("clearbtn").onclick = onClear;
 function onClear(){
@@ -130,9 +132,10 @@ function onClear(){
     ctxIn.fillStyle = "black";
 }
 
-
 // post data to server for recognition
 function onRecognition() {
+    console.time("time");
+
     $.ajax({
             url: './DigitRecognition',
             type:'POST',
@@ -146,6 +149,8 @@ function onRecognition() {
             console.log(XMLHttpRequest);
             alert("error");
         })
+
+    console.timeEnd("time");
 }
 
 
@@ -173,8 +178,8 @@ function showResult(resultJson){
         .data(graphData)
         .transition()
         .duration(300)
-        .style("fill", (d, i)=> (i == resultJson.predict_digit ? "blue":"green"))
-        .attr("width", (d)=> d * 2)  
+        .style("fill", function(d, i){return (i == resultJson.predict_digit ? "blue":"green")})
+        .attr("width", function(d){return d * 2})  
 
 }
 

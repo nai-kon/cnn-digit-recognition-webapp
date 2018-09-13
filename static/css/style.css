@@ -1,4 +1,18 @@
+.common {
+    text-align: center;
+}
+
+.title {
+    font-size: x-large; 
+}
+
+.boxitem {
+    display: inline-block;
+    vertical-align: top;
+}
+
 #clearbtn {
-    width:400px;
-    style="text-align:center";
+    width: 196px;
+    font-size: medium;
+    display: block;
 }
