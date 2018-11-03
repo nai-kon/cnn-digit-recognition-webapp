@@ -31,13 +31,13 @@ A Flask WebApp for Handwritten digit recognition using Convolution Neural Networ
 
 ### Usage
 
-- #### Training
+- #### Training Model
   ```
   - python3 train.py  
   ```
-- #### Recognition(WebApp)
+- #### Run WebApp
   ```
   - python3 server.py
-  - access to localhost:5000
+    ->access to localhost:5000
   ```
   
