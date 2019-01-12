@@ -14,12 +14,7 @@ window.onload = function(){
     ctxIn.fillRect(0, 0, cvsIn.width, cvsIn.height);
     ctxIn.lineWidth = 7;
     ctxIn.lineCap = "round";
-
-    ctxOut.fillStyle = "black";
-    ctxOut.font = "160px 'century'";
-    ctxOut.textAlign = "center";
-    ctxOut.textBaseline = "middle";
-    ctxOut.fillText("0", cvsOut.width/2, cvsOut.height/2);  
+    
     initProbGraph();
 }
 
