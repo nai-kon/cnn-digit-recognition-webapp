@@ -2,8 +2,7 @@
 
 let cvsIn = document.getElementById("inputimg");
 let ctxIn = cvsIn.getContext('2d');
-let cvsOut = document.getElementById("predictdigit");
-let ctxOut = cvsOut.getContext('2d');
+let divOut = document.getElementById("predictdigit");
 let svgGraph = null;
 let mouselbtn = false;
 
@@ -157,8 +156,7 @@ function onRecognition() {
 function showResult(resultJson){
 
     // show predict digit
-    ctxOut.clearRect(0, 0, cvsOut.width, cvsOut.height);
-    ctxOut.fillText(resultJson.predict_digit, cvsOut.width/2, cvsOut.height/2);   
+    divOut.textContent = resultJson.predict_digit;
 
     // show probability
     document.getElementById("probStr").innerHTML = 
