@@ -9,5 +9,5 @@ if __name__ == '__main__':
         if input('Trained model is exist. Overwrite it? y/n ') == "n":
             sys.exit()
 
-    # 学習
+	# Training network
     cnn.train()
