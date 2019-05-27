@@ -25,7 +25,7 @@ def ExecPy():
         postImg = BytesIO(base64.urlsafe_b64decode(request.form['img']))
         res =  cnn.predict(postImg) 
         
-        if res:
+        if res is not None:
             retJson["predict_digit"] = str(np.argmax(res))
 
             for i, item in enumerate(res):
