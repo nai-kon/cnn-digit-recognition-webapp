@@ -1,11 +1,15 @@
-## Digit Recognition WebApp by CNN using TensorFlow and Flask
-A Flask WebApp for Handwritten digit recognition using Convolution Neural Network.      
+# Digit Recognition WebApp by CNN using TensorFlow and Flask
+
+### A Flask WebApp for Handwritten digit recognition using Convolution Neural Network.      
 **Demo Site : http://naikon.server-on.net/DigitRecognition/**
 
-![Digit Recognition](./demo.gif)
+<p align="center">
+  <img src="demo.gif" alt="Digit Recognition"/>
+</p>
 
+---
 
-### Specific
+### Specific 
 
 #### Neural Network
   
