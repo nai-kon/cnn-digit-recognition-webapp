@@ -14,7 +14,7 @@ A Flask WebApp for Handwritten digit recognition using Convolution Neural Networ
 - Adam Optimizer
 - Dropout
 - Automatic Centering the Input Digit
-- 99% of accuracy at MNIST test images
+- 99.3% of accuracy at MNIST test images
 
 
 #### Web Application
