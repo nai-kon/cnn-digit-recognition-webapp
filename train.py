@@ -2,7 +2,7 @@ import tensorflow as tf
 from network import ConvNeuralNet
 from tensorflow.examples.tutorials.mnist import input_data
 
-MODEL_PATH = "model/WeightFile.ckpt"
+MODEL_PATH = "model/best_acc.ckpt"
 
 
 if __name__ == '__main__':
