@@ -1,0 +1,4 @@
+tensorflow==1.9
+numpy==1.14
+Flask
+Pillow

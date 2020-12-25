@@ -17,12 +17,9 @@
 - using Flask web framework (But the demo site uses Nginx + uWSGI)
 - using d3.js for drawing bar graph
 
-### Requirement
-- Python 3.6
-- TensorFlow 1.9
-- Flask
-- NumPy
-- PIL(pillow)
+### Requirements
+- tested on Python 3.6
+- `pip install -r requirements.txt`
 
 ### Usage
 
@@ -30,5 +27,6 @@
   `python3 train.py`
 
 - #### Run WebApp
-  `python3 server.py` then access to localhost:5000
+  `python3 server.py`   
+  ->then access to localhost:5000
   
