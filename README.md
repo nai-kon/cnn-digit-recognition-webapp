@@ -1,5 +1,4 @@
 ## Digit Recognition WebApp using TensorFlow and Flask
-**Demo Site : http://naikon.server-on.net/DigitRecognition/**
 
 ![Digit Recognition](./demo.gif)
 
