@@ -103,3 +103,7 @@ venv.bak/
 # mypy
 .mypy_cache/
 /.vs
+
+
+MNIST_data/
+predict_results/

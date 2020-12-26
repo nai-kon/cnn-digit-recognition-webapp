@@ -14,7 +14,7 @@
 
 #### Web Application
 
-- using Flask web framework (But the demo site uses Nginx + uWSGI)
+- using Flask web framework
 - using d3.js for drawing bar graph
 
 ### Requirements

@@ -32,8 +32,8 @@ def ExecPy():
     if res is not None:
         retJson["predict_digit"] = str(np.argmax(res))
 
-        for i, item in enumerate(res):
-            retJson["prob"][i] = float(item * 100)
+        for i, prob in enumerate(res):
+            retJson["prob"][i] = prob * 100
 
         # save digits
         Image.open(postImg).save("./predict_results/{}_{}.png".format(datetime.now().strftime('%m-%d_%H.%M.%S'), retJson["predict_digit"]))
@@ -44,27 +44,21 @@ def ExecPy():
 # centering input digit
 def __centering_img(img):
 
-    width, height = img.size[:2]
-    left, top, right, bottom = width, height, -1, -1
+    w, h = img.size[:2]
+    left, top, right, bottom = w, h, -1, -1
     imgpix = img.getdata()
-
-    for y in range(height):
-        yoffset = y * width
-        for x in range(width):
+    
+    for y in range(h):
+        yoffset = y * w
+        for x in range(w):
             if imgpix[yoffset + x] < 255:
+                left = min(left, x)
+                top = min(top, y)
+                right = max(right, x)
+                bottom = max(bottom, y)
 
-                # do not use GetPixel and SetPixel, it is so slow.
-                if x < left:
-                    left = x
-                if y < top:
-                    top = y
-                if x > right:
-                    right = x
-                if y > bottom:
-                    bottom = y
-
-    shiftX = (left + (right - left) // 2) - width // 2
-    shiftY = (top + (bottom - top) // 2) - height // 2
+    shiftX = (left + (right - left) // 2) - w // 2
+    shiftY = (top + (bottom - top) // 2) - h // 2
 
     return ImageChops.offset(img, -shiftX, -shiftY)
 
@@ -83,7 +77,7 @@ def predict(imgpath):
 
     img.thumbnail((28, 28))  # resize to 28x28
     img = np.array(img, dtype=np.float32)
-    img = 1 - np.array(img / 255)  # normalize
+    img = 1 - np.array(img / 255)  # invert and normalize
     img = img.reshape(1, 784)
 
     # predict

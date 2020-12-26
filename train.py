@@ -23,9 +23,10 @@ if __name__ == '__main__':
 
         # training
         best_eval_acc = 0
+        batch_size = 50
         for step in range(20000 + 1):
             # mini batch training
-            batch = mnist.train.next_batch(50)
+            batch = mnist.train.next_batch(batch_size)
             model.train_step.run(feed_dict={model.x: batch[0], model.y_: batch[1], model.keep_prob: 0.5})
 
             # evaluation
