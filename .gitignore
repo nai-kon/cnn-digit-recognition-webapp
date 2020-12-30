@@ -105,5 +105,4 @@ venv.bak/
 /.vs
 
 
-MNIST_data/
-predict_results/
+data/

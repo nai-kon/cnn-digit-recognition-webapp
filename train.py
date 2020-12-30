@@ -1,42 +1,95 @@
-import tensorflow as tf
-from network import ConvNeuralNet
-from tensorflow.examples.tutorials.mnist import input_data
+import numpy as np
+import torch
+import torchvision
+from torchvision import transforms
+from model import Model
+import time
+import random
 
-MODEL_PATH = "model/best_acc.ckpt"
+SAVE_MODEL_PATH = "checkpoint/best_accuracy.pth"
+
+
+def train(opt):
+    device = torch.device("cuda" if opt.use_gpu and torch.cuda.is_available() else "cpu")
+    print("device:", device)
+
+    model = Model().to(device)
+    criterion = torch.nn.CrossEntropyLoss().to(device)
+    optimizer = torch.optim.Adam(model.parameters(), lr=opt.lr)
+
+    # data preparation
+    transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
+    trainset = torchvision.datasets.MNIST(root='./data', train=True, transform=transform, download=True)
+    trainloader = torch.utils.data.DataLoader(trainset, batch_size=opt.batch_size)
+    testset = torchvision.datasets.MNIST(root='./data', train=False, transform=transform, download=True)
+    testloader = torch.utils.data.DataLoader(testset, batch_size=opt.batch_size)
+
+    best_eval_acc = 0
+    start = time.time()
+    for ep in range(opt.num_epoch):
+        avg_loss = 0
+        model.train()
+        print(f"{ep + 1}/{opt.num_epoch} epoch start")
+
+        for i, (imgs, labels) in enumerate(trainloader):
+            imgs, labels = imgs.to(device), labels.to(device)
+
+            preds = model(imgs)
+            loss = criterion(preds, labels)
+
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+            avg_loss += loss.item()
+
+            if i > 0 and i % 100 == 0:
+                print(f"loss:{avg_loss / 100:.4f}")
+                avg_loss = 0
+
+        # validation
+        if ep % opt.valid_interval == 0:
+            tp, cnt = 0, 0
+            model.eval()
+            with torch.no_grad():
+                for i, (imgs, labels) in enumerate(testloader):
+                    imgs, labels = imgs.to(device), labels.to(device)
+
+                    preds = model(imgs)
+                    preds = torch.argmax(preds, dim=1)
+
+                    tp += (preds == labels).sum().item()
+                    cnt += labels.shape[0]
+
+                acc = tp / cnt
+                print(f"eval acc:{acc:.4f}")
+
+                # save best model
+                if acc > best_eval_acc:
+                    best_eval_acc = acc
+                    torch.save(model.state_dict(), SAVE_MODEL_PATH)
+
+        print(f"{ep + 1}/{opt.num_epoch} epoch finished. elapsed time:{time.time() - start:.1f} sec")
+
+    print("training finished. best eval acc:{:.4f}".format(best_eval_acc))
 
 
 if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--manual_seed', type=int, default=1111, help='random seed setting')
+    parser.add_argument('--batch_size', type=int, default=50, help='input batch size')
+    parser.add_argument('--num_epoch', type=int, default=30, help='number of epochs to train')
+    parser.add_argument('--valid_interval', type=int, default=1, help='interval between each validation')
+    parser.add_argument('--lr', type=float, default=1e-4, help='learning rate')
+    parser.add_argument('--use_gpu', action='store_true', help='use gpu if availabe')
+    opt = parser.parse_args()
+    print("args", opt)
 
-    if tf.train.checkpoint_exists(MODEL_PATH):
-        if input('Trained model already exists. Continue? y/n ') != "y":
-            exit(0)
+    # set seed
+    random.seed(opt.manual_seed)
+    np.random.seed(opt.manual_seed)
+    torch.manual_seed(opt.manual_seed)
+    torch.cuda.manual_seed(opt.manual_seed)
 
-    with tf.Session() as sess:
-        model = ConvNeuralNet()
-        sess.run(tf.global_variables_initializer())
-        correct_prediction = tf.equal(tf.argmax(model.y_conv, 1), tf.argmax(model.y_, 1))
-        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-        saver = tf.train.Saver()
-
-        # download MNIST dataset
-        mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
-
-        # training
-        best_eval_acc = 0
-        batch_size = 50
-        for step in range(20000 + 1):
-            # mini batch training
-            batch = mnist.train.next_batch(batch_size)
-            model.train_step.run(feed_dict={model.x: batch[0], model.y_: batch[1], model.keep_prob: 0.5})
-
-            # evaluation
-            if step % 100 == 0:
-                eval_acc = accuracy.eval(feed_dict={model.x: mnist.test.images, model.y_: mnist.test.labels, model.keep_prob: 1.0})
-                print("training... :{}/20000 eval_acc:{:.4f}".format(step, eval_acc))
-
-                # save best accuracy model
-                if eval_acc > best_eval_acc:
-                    best_eval_acc = eval_acc
-                    saver.save(sess, MODEL_PATH)
-
-        print("training finished. best_eval_acc:{:.4f}".format(best_eval_acc))
+    # training
+    train(opt)
