@@ -1,3 +1,4 @@
+import numpy as np
 from io import BytesIO
 from flask import Flask, render_template, request
 import torch
@@ -6,7 +7,6 @@ from model import Model
 from train import SAVE_MODEL_PATH
 import base64
 import json
-import numpy as np
 from PIL import Image, ImageOps, ImageChops
 
 app = Flask(__name__)
@@ -40,9 +40,9 @@ def predict_digit():
 
 class Predict():
     def __init__(self):
-        # using cpu
-        self.model = Model()
-        self.model.load_state_dict(torch.load(SAVE_MODEL_PATH))
+        self.device = torch.device("cpu")  # use cpu
+        self.model = Model().to(self.device)
+        self.model.load_state_dict(torch.load(SAVE_MODEL_PATH, map_location=self.device))
         self.transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
 
     def _centering_img(self, img):

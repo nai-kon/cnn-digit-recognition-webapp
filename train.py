@@ -1,16 +1,16 @@
+import numpy as np
 import torch
 import torchvision
 from torchvision import transforms
 from model import Model
 import time
 import random
-import numpy as np
 
 SAVE_MODEL_PATH = "checkpoint/best_accuracy.pth"
 
 
 def train(opt):
-    device = torch.device('cuda' if opt.use_gpu and torch.cuda.is_available() else 'cpu')
+    device = torch.device("cuda" if opt.use_gpu and torch.cuda.is_available() else "cpu")
     print("device:", device)
 
     model = Model().to(device)
@@ -19,9 +19,9 @@ def train(opt):
 
     # data preparation
     transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
-    trainset = torchvision.datasets.MNIST(root='./data', train=True, transform=transform)
+    trainset = torchvision.datasets.MNIST(root='./data', train=True, transform=transform, download=True)
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=opt.batch_size)
-    testset = torchvision.datasets.MNIST(root='./data', train=False, transform=transform)
+    testset = torchvision.datasets.MNIST(root='./data', train=False, transform=transform, download=True)
     testloader = torch.utils.data.DataLoader(testset, batch_size=opt.batch_size)
 
     best_eval_acc = 0
