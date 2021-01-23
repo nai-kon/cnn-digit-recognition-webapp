@@ -1,48 +1,46 @@
-import numpy as np
-from io import BytesIO
-from flask import Flask, render_template, request
-import torch
-from torchvision import transforms
-from model import Model
-from train import SAVE_MODEL_PATH
 import base64
 import json
-from PIL import Image, ImageOps, ImageChops
+from io import BytesIO
+
+import numpy as np
+import torch
+from flask import Flask, render_template, request
+from PIL import Image, ImageChops, ImageOps
+from torchvision import transforms
+
+from model import Model
+from train import SAVE_MODEL_PATH
 
 app = Flask(__name__)
 predict = None
 
 
-# return Index page
-@app.route('/')
+@app.route("/")
 def index():
-    return render_template('index.html')
+    return render_template("index.html")
 
 
-# Recognition POST
-@app.route('/DigitRecognition', methods=['POST'])
+@app.route("/DigitRecognition", methods=["POST"])
 def predict_digit():
     # load image
-    img = BytesIO(base64.urlsafe_b64decode(request.form['img']))
-    img = Image.open(img).convert('L')
+    img = BytesIO(base64.urlsafe_b64decode(request.form["img"]))
+    img = Image.open(img).convert("L")
 
     # predict
-    res = predict(img) if predict is not None else None
-
-    res_json = {"predict_digit": "Err", "detect_img": "", "centering_img": "", "prob": {}}
-    if res is not None:
-        res_json["predict_digit"] = str(np.argmax(res))
-        for i, prob in enumerate(res):
-            res_json["prob"][i] = prob * 100
+    res_json = {"pred": "Err", "probs": []}
+    if predict is not None:
+        res = predict(img)
+        res_json["pred"] = str(np.argmax(res))
+        res_json["probs"] = [p * 100 for p in res]
 
     return json.dumps(res_json)
 
 
 class Predict():
     def __init__(self):
-        self.device = torch.device("cpu")  # use cpu
-        self.model = Model().to(self.device)
-        self.model.load_state_dict(torch.load(SAVE_MODEL_PATH, map_location=self.device))
+        device = torch.device("cpu")
+        self.model = Model().to(device)
+        self.model.load_state_dict(torch.load(SAVE_MODEL_PATH, map_location=device))
         self.transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
 
     def _centering_img(self, img):
@@ -80,8 +78,7 @@ class Predict():
 
 if __name__ == "__main__":
     import os
-
     assert os.path.exists(SAVE_MODEL_PATH), "no saved model"
     predict = Predict()
 
-    app.run(host='0.0.0.0')
+    app.run(host="0.0.0.0")

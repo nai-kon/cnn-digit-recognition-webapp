@@ -1,14 +1,14 @@
 
 
 let cvsIn = document.getElementById("inputimg");
-let ctxIn = cvsIn.getContext('2d');
-let divOut = document.getElementById("predictdigit");
+let ctxIn = cvsIn.getContext("2d");
+let divOut = document.getElementById("pred");
 let svgGraph = null;
 let mouselbtn = false;
 
 
 // initilize
-window.onload = function(){
+window.onload = ()=>{
     
     ctxIn.fillStyle = "white";
     ctxIn.fillRect(0, 0, cvsIn.width, cvsIn.height);
@@ -18,7 +18,6 @@ window.onload = function(){
     initProbGraph();
 }
 
-// init probability graph
 function initProbGraph(){
 
     const dummyData = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]; // dummy data for initialize graph
@@ -44,16 +43,15 @@ function initProbGraph(){
         .data(dummyData)
         .enter()
         .append("rect")
-        .attr("y", function(d,i){return yScale(i) - barHeight / 2})
+        .attr("y", (d,i)=>(yScale(i) - barHeight / 2))
         .attr("height", barHeight)
         .style("fill", "green")
         .attr("x", 0)
-        .attr("width", function(d){return d * 2})
+        .attr("width", (d)=>d * 2)
         .call(d3.axisLeft(yScale));
 }
 
-// add cavas events
-cvsIn.addEventListener("mousedown", function(e) { 
+cvsIn.addEventListener("mousedown", (e)=>{ 
 
     if(e.button == 0){
         let rect = e.target.getBoundingClientRect();
@@ -64,16 +62,18 @@ cvsIn.addEventListener("mousedown", function(e) {
         ctxIn.moveTo(x, y);
     }   
     else if(e.button == 2){
-        onClear();  // right click for clear input
+        onClear();  // clear by mouse right button
     }
 });
-cvsIn.addEventListener("mouseup", function(e) { 
+
+cvsIn.addEventListener("mouseup", (e)=>{ 
     if(e.button == 0){
         mouselbtn = false; 
         onRecognition();
     }
 });
-cvsIn.addEventListener("mousemove", function(e) {
+
+cvsIn.addEventListener("mousemove", (e)=>{
     let rect = e.target.getBoundingClientRect();
     let x = e.clientX - rect.left;
     let y = e.clientY - rect.top;
@@ -83,7 +83,7 @@ cvsIn.addEventListener("mousemove", function(e) {
     }
 });
 
-cvsIn.addEventListener("touchstart", function(e) {
+cvsIn.addEventListener("touchstart", (e)=>{
     // for touch device
     if (e.targetTouches.length == 1) {
         let rect = e.target.getBoundingClientRect();
@@ -95,7 +95,7 @@ cvsIn.addEventListener("touchstart", function(e) {
     }
 });
 
-cvsIn.addEventListener("touchmove", function(e) {
+cvsIn.addEventListener("touchmove", (e)=>{
     // for touch device
     if (e.targetTouches.length == 1) {
         let rect = e.target.getBoundingClientRect();
@@ -108,15 +108,9 @@ cvsIn.addEventListener("touchmove", function(e) {
     }
 });
 
-cvsIn.addEventListener("touchend", function(e) { 
-    // for touch device
-    onRecognition();
-});
+cvsIn.addEventListener("touchend", (e)=>onRecognition());
 
-// prevent display the contextmenu 
-cvsIn.addEventListener('contextmenu', function(e) {
-    e.preventDefault();
-});
+cvsIn.addEventListener("contextmenu", (e)=>e.preventDefault());
 
 document.getElementById("clearbtn").onclick = onClear;
 function onClear(){
@@ -126,65 +120,35 @@ function onClear(){
     ctxIn.fillStyle = "black";
 }
 
-// post data to server for recognition
+// post digit to server for recognition
 function onRecognition() {
     console.time("time");
 
     $.ajax({
-            url: './DigitRecognition',
-            type:'POST',
-            data : {img : cvsIn.toDataURL("image/png").replace('data:image/png;base64,','') },
-
-        }).done(function(data) {
-
-            showResult(JSON.parse(data))
-
-        }).fail(function(XMLHttpRequest, textStatus, errorThrown) {
-            console.log(XMLHttpRequest);
-            alert("error");
-        })
+        url: "./DigitRecognition",
+        type:"POST",
+        data : {img : cvsIn.toDataURL("image/png").replace("data:image/png;base64,","") },
+    })
+    .then(
+        (data)=>showResult(JSON.parse(data)),
+        ()=>alert("error")
+    )
 
     console.timeEnd("time");
 }
 
 
-function showResult(resultJson){
+function showResult(res){
 
-    // show predict digit
-    divOut.textContent = resultJson.predict_digit;
+    divOut.textContent = res.pred;
 
-    // show probability
-    document.getElementById("probStr").innerHTML = 
-        "Probability : " + resultJson.prob[resultJson.predict_digit].toFixed(2) + "%";    
-
-    // show processing images
-    //drawImgToCanvas("detectimg", resultJson.detect_img);
-    //drawImgToCanvas("centerimg", resultJson.centering_img);
-
-    // show probability graph
-    let graphData = [];
-    for (let val in resultJson.prob){
-        graphData.push(resultJson.prob[val]);
-    }
+    document.getElementById("prob").innerHTML = 
+        "Probability : " + res.probs[res.pred].toFixed(2) + "%";    
 
     svgGraph.selectAll("rect")
-        .data(graphData)
+        .data(res.probs)
         .transition()
         .duration(300)
-        .style("fill", function(d, i){return (i == resultJson.predict_digit ? "blue":"green")})
-        .attr("width", function(d){return d * 2})  
-
+        .style("fill", (d, i) => i == res.pred ? "blue":"green")
+        .attr("width", (d) => d * 2)
 }
-
-
-function drawImgToCanvas(canvasId, b64Img){
-    let canvas = document.getElementById(canvasId);
-    let ctx = canvas.getContext('2d');
-    let img = new Image();
-    img.src = "data:image/png;base64," + b64Img;
-    img.onload = function(){
-        ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, canvas.width, canvas.height);
-    }   
-}   
-
-

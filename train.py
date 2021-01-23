@@ -1,10 +1,12 @@
+import random
+import time
+
 import numpy as np
 import torch
 import torchvision
 from torchvision import transforms
+
 from model import Model
-import time
-import random
 
 SAVE_MODEL_PATH = "checkpoint/best_accuracy.pth"
 
@@ -19,9 +21,9 @@ def train(opt):
 
     # data preparation
     transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
-    trainset = torchvision.datasets.MNIST(root='./data', train=True, transform=transform, download=True)
+    trainset = torchvision.datasets.MNIST(root="./data", train=True, transform=transform, download=True)
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=opt.batch_size)
-    testset = torchvision.datasets.MNIST(root='./data', train=False, transform=transform, download=True)
+    testset = torchvision.datasets.MNIST(root="./data", train=False, transform=transform, download=True)
     testloader = torch.utils.data.DataLoader(testset, batch_size=opt.batch_size)
 
     best_eval_acc = 0
@@ -73,15 +75,15 @@ def train(opt):
     print("training finished. best eval acc:{:.4f}".format(best_eval_acc))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--manual_seed', type=int, default=1111, help='random seed setting')
-    parser.add_argument('--batch_size', type=int, default=50, help='input batch size')
-    parser.add_argument('--num_epoch', type=int, default=30, help='number of epochs to train')
-    parser.add_argument('--valid_interval', type=int, default=1, help='interval between each validation')
-    parser.add_argument('--lr', type=float, default=1e-4, help='learning rate')
-    parser.add_argument('--use_gpu', action='store_true', help='use gpu if availabe')
+    parser.add_argument("--manual_seed", type=int, default=1111, help="random seed setting")
+    parser.add_argument("--batch_size", type=int, default=50, help="input batch size")
+    parser.add_argument("--num_epoch", type=int, default=30, help="number of epochs to train")
+    parser.add_argument("--valid_interval", type=int, default=1, help="interval between each validation")
+    parser.add_argument("--lr", type=float, default=1e-4, help="learning rate")
+    parser.add_argument("--use_gpu", action="store_true", help="use gpu if availabe")
     opt = parser.parse_args()
     print("args", opt)
 
