@@ -1,6 +1,6 @@
 numpy==1.19.3
 Flask==1.1.2
-Pillow==8.0.1
+Pillow>=8.1.1
 torch===1.7.1+cu110 
 torchvision===0.8.2+cu110
 --find-links https://download.pytorch.org/whl/torch_stable.html

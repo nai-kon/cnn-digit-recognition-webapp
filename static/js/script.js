@@ -124,15 +124,22 @@ function onClear(){
 function onRecognition() {
     console.time("time");
 
-    $.ajax({
-        url: "./DigitRecognition",
-        type:"POST",
-        data : {img : cvsIn.toDataURL("image/png").replace("data:image/png;base64,","") },
+    cvsIn.toBlob((blob)=>{
+        let form = new FormData();
+        form.append('img', blob, "dummy.png")
+
+        $.ajax({
+            url: "./DigitRecognition",
+            type: "POST",
+            data: form,
+            processData: false,
+            contentType: false,
+        })
+        .then(
+            (data)=>showResult(JSON.parse(data)),
+            ()=>alert("error")
+        )    
     })
-    .then(
-        (data)=>showResult(JSON.parse(data)),
-        ()=>alert("error")
-    )
 
     console.timeEnd("time");
 }

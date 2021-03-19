@@ -1,6 +1,4 @@
-import base64
 import json
-from io import BytesIO
 
 import numpy as np
 import torch
@@ -22,9 +20,7 @@ def index():
 
 @app.route("/DigitRecognition", methods=["POST"])
 def predict_digit():
-    # load image
-    img = BytesIO(base64.urlsafe_b64decode(request.form["img"]))
-    img = Image.open(img).convert("L")
+    img = Image.open(request.files["img"]).convert("L")
 
     # predict
     res_json = {"pred": "Err", "probs": []}
