@@ -45,17 +45,17 @@ class Predict():
         imgpix = img.getdata()
 
         for y in range(h):
-            yoffset = y * w
+            offset_y = y * w
             for x in range(w):
-                if imgpix[yoffset + x] > 0:
+                if imgpix[offset_y + x] > 0:
                     left = min(left, x)
                     top = min(top, y)
                     right = max(right, x)
                     bottom = max(bottom, y)
 
-        shiftX = (left + (right - left) // 2) - w // 2
-        shiftY = (top + (bottom - top) // 2) - h // 2
-        return ImageChops.offset(img, -shiftX, -shiftY)
+        shift_x = (left + (right - left) // 2) - w // 2
+        shift_y = (top + (bottom - top) // 2) - h // 2
+        return ImageChops.offset(img, -shift_x, -shift_y)
 
     def __call__(self, img):
         img = ImageOps.invert(img)  # MNIST image is inverted
