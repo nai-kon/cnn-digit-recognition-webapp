@@ -40,25 +40,14 @@ class Predict():
         self.transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
 
     def _centering_img(self, img):
+        left, top, right, bottom = img.getbbox()
         w, h = img.size[:2]
-        left, top, right, bottom = w, h, -1, -1
-        imgpix = img.getdata()
-
-        for y in range(h):
-            offset_y = y * w
-            for x in range(w):
-                if imgpix[offset_y + x] > 0:
-                    left = min(left, x)
-                    top = min(top, y)
-                    right = max(right, x)
-                    bottom = max(bottom, y)
-
         shift_x = (left + (right - left) // 2) - w // 2
         shift_y = (top + (bottom - top) // 2) - h // 2
         return ImageChops.offset(img, -shift_x, -shift_y)
 
     def __call__(self, img):
-        img = ImageOps.invert(img)  # MNIST image is inverted
+        img = ImageOps.invert(img)
         img = self._centering_img(img)
         img = img.resize((28, 28), Image.BICUBIC)  # resize to 28x28
         tensor = self.transform(img)
