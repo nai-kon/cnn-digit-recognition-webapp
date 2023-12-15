@@ -23,8 +23,8 @@ def train(opt):
     transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
     trainset = torchvision.datasets.MNIST(root="./data", train=True, transform=transform, download=True)
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=opt.batch_size)
-    testset = torchvision.datasets.MNIST(root="./data", train=False, transform=transform, download=True)
-    testloader = torch.utils.data.DataLoader(testset, batch_size=opt.batch_size)
+    valset = torchvision.datasets.MNIST(root="./data", train=False, transform=transform, download=True)
+    valloader = torch.utils.data.DataLoader(valset, batch_size=opt.batch_size)
 
     # training epoch loop
     best_eval_acc = 0
@@ -54,7 +54,7 @@ def train(opt):
         if ep % opt.valid_interval == 0:
             tp, cnt = 0, 0
             model.eval()
-            for i, (imgs, labels) in enumerate(testloader):
+            for i, (imgs, labels) in enumerate(valloader):
                 imgs, labels = imgs.to(device), labels.to(device)
                 with torch.no_grad():
                     preds = model(imgs)
