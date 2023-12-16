@@ -1,6 +1,5 @@
 import json
 
-import numpy as np
 import torch
 from flask import Flask, render_template, request
 from PIL import Image, ImageChops, ImageOps
@@ -23,10 +22,10 @@ def predict_digit():
     img = Image.open(request.files["img"]).convert("L")
 
     # predict
-    res_json = {"pred": "Err", "probs": []}
+    res_json = {"pred": 0, "probs": [0]}
     if predict is not None:
         res = predict(img)
-        res_json["pred"] = str(np.argmax(res))
+        res_json["pred"] = int(res.argmax())
         res_json["probs"] = [p * 100 for p in res]
 
     return json.dumps(res_json)
@@ -66,4 +65,4 @@ if __name__ == "__main__":
     assert os.path.exists(SAVE_MODEL_PATH), "no saved model"
     predict = Predict()
 
-    app.run(host="0.0.0.0")
+    app.run(host="0.0.0.0", port=5001)
