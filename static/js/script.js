@@ -117,22 +117,19 @@ function onClear() {
 function onRecognition() {
     console.time("time");
 
-    cvsIn.toBlob(blob => {
+    cvsIn.toBlob(async blob => {
         const body = new FormData();
         body.append('img', blob, "dummy.png")
-
-        fetch("./DigitRecognition", {
-            method: "POST",
-            body: body,
-        })
-            .then(res => {
-                if (!res.ok) {
-                    throw new Error("Network response was not OK");
-                }
-                return res.json();
+        try{
+            const response = await fetch("./DigitRecognition", {
+                method: "POST",
+                body: body,
             })
-            .then(json => showResult(json))
-            .catch(error => alert("error", error));
+            const resjson = await response.json()
+            showResult(resjson)
+        } catch (error){
+            alert("error", error)
+        }
     })
 
     console.timeEnd("time");
