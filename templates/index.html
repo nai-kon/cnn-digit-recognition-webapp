@@ -2,29 +2,29 @@
 <html lang="ja">
 
 <head>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>CNN Digit Recognition </title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body>
-    <p class="title common">CNN Digit Recognition WebApp using PyTorch and Flask</p>
-    <div class="common">
-        <a href="https://github.com/nai-kon/CNN-Digit-Recognition">https://github.com/nai-kon/CNN-Digit-Recognition</a><br>
-        created by Katz Sasaki
+    <p class="text-4xl text-center m-3">CNN Digit Recognition WebApp using PyTorch and Flask</p>
+    <div class="text-center">
+        <a href="https://github.com/nai-kon/CNN-Digit-Recognition">https://github.com/nai-kon/CNN-Digit-Recognition</a>
+        <div class="italic">created by Katz Sasaki</div>
     </div>
     <br>
-    <div class="common">
-        <div class="boxitem">
-            <canvas id="inputimg" width="196" height="196"></canvas>
-            <button id="clearbtn">Clear</button>
+    <div class="text-center">
+        <div class="inline-block align-top m-1">
+            <canvas class="border border-black" id="inputimg" width="196" height="196"></canvas>
+            <button class="bg-blue-50 hover:bg-blue-200 border border-blue-300 border-t-0 w-full" id="clearbtn">Clear</button>
         </div>
-        <div class="boxitem">
-            <div id="pred">0</div>
-            <div id="prob">Probability : </div>
+        <div class="inline-block align-top m-1">
+            <div class="border border-black text-9xl w-[198px] h-[198px] leading-[198px]" id="pred">0</div>
+            <div class="w-full" id="prob">Probability: </div>
         </div>
-        <div class="boxitem">
+        <div class="inline-block align-top m-1">
             <svg id="probGraph" width="250" height="196"></svg>
         </div>
     </div>
