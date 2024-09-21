@@ -26,7 +26,7 @@ def predict_digit():
     if predict is not None:
         res = predict(img)
         res_json["pred"] = int(res.argmax())
-        res_json["probs"] = [p * 100 for p in res]
+        res_json["probs"] = (res * 100).tolist()
 
     return json.dumps(res_json)
 

@@ -62,12 +62,13 @@ def train(opt):
                 tp += (preds == labels).sum().item()
                 cnt += labels.shape[0]
             acc = tp / cnt
-            print(f"eval acc:{acc:.4f}")
+            print(f"eval accuracy:{acc:.4f}")
 
             # save best model
             if acc > best_eval_acc:
                 best_eval_acc = acc
                 torch.save(model.state_dict(), SAVE_MODEL_PATH)
+                print("saved best accuracy model")
 
         print(f"{ep + 1}/{opt.num_epoch} epoch finished. elapsed time:{time.time() - start:.1f} sec")
 
