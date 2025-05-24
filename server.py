@@ -1,7 +1,5 @@
-import json
-
 import torch
-from flask import Flask, render_template, request
+from flask import Flask, jsonify, render_template, request
 from PIL import Image, ImageChops, ImageOps
 from torchvision import transforms
 
@@ -28,7 +26,7 @@ def predict_digit():
         res_json["pred"] = int(res.argmax())
         res_json["probs"] = (res * 100).tolist()
 
-    return json.dumps(res_json)
+    return jsonify(res_json)
 
 
 class Predict():
